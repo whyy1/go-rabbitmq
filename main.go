@@ -15,32 +15,41 @@ var (
 )
 
 func main() {
-	//os.Getenv()
 	coon, err := internal.NewCoon(source)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	//coon.CoonClose()
+	//_, err = internal.NewChannelManager(coon)
+	//if err != nil {
+	//	return
+	//}
 
-	manager, err := internal.NewChannelManager(coon)
+	pubilsh, err := NewPubilsh(coon)
 	if err != nil {
+		fmt.Println(err)
 		return
 	}
-
+	pubilsh.PublishWithContext("", "test", false, false, []byte("test"))
+	pubilsh.Close()
 	time.Sleep(5 * time.Second)
-	manager.ChannelClose()
 
-	_, err = internal.NewChannelManager(coon)
+	pubilsh1, err := NewPubilsh(coon)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	_, err = internal.NewChannelManager(coon)
+	pubilsh1.PublishWithContext("", "test", false, false, []byte("test1"))
+	pubilsh1.Close()
+	time.Sleep(2 * time.Second)
+
+	pubilsh2, err := NewPubilsh(coon)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+	pubilsh2.PublishWithContext("", "test", false, false, []byte("test2"))
+
 	forever := make(chan bool)
 	log.Printf(" [*] Waiting for messages. To exit press CTRL+C")
 	<-forever

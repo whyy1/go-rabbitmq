@@ -9,7 +9,7 @@ import (
 type ConnectionManager struct {
 	source          string
 	conn            *amqp.Connection
-	connLocker      sync.Locker
+	connLocker      *sync.Mutex
 	options         ConnectionOptions
 	channelPool     sync.Pool
 	connNotifyClose chan *amqp.Error
@@ -17,8 +17,9 @@ type ConnectionManager struct {
 
 func NewCoon(url string, opts ...func(*ConnectionOptions)) (connectionManager *ConnectionManager, err error) {
 	connectionManager = &ConnectionManager{
-		source:  url,
-		options: SetDefaultConnectionOptions(), //设置默认的链接参数
+		source:     url,
+		connLocker: &sync.Mutex{},
+		options:    SetDefaultConnectionOptions(), //设置默认的链接参数
 	}
 	//设置参数
 	for _, optFunc := range opts {
@@ -73,20 +74,40 @@ func (connectionManager *ConnectionManager) reconnect() (err error) {
 		return err
 	}
 	connectionManager.options.Logger.Infof("Reconnecting successfully")
-	//关闭现有连接再重新赋值，避免并发问题或资源未释放
-	if err := connectionManager.conn.Close(); err != nil {
-		connectionManager.options.Logger.Errorf("Old Connection Close err=%v", err)
+
+	if !connectionManager.conn.IsClosed() {
+		//如果原有连接未关闭，关闭原有连接再重新赋值，避免并发问题或资源未释放
+		if err := connectionManager.conn.Close(); err != nil {
+			connectionManager.options.Logger.Errorf("Old Connection Close err=%v", err)
+		}
 	}
+	connectionManager.connLocker.Lock()
+	defer connectionManager.connLocker.Unlock()
+
 	connectionManager.conn = coon
-	// 初始化 channelPool 的 New 函数
-	connectionManager.channelPool.New = newChannelPool(connectionManager)
+
+	connectionManager.clearChannelPool() //清空Channel协程池
 	return
+}
+func (connectionManager *ConnectionManager) clearChannelPool() {
+	connectionManager.channelPool = sync.Pool{
+		New: func() interface{} {
+			connectionManager.connLocker.Lock()
+			defer connectionManager.connLocker.Unlock()
+			channel, err := connectionManager.conn.Channel()
+			if err != nil {
+				connectionManager.options.Logger.Errorf("coon新建channel失败,错误为%v", err)
+				return nil
+			}
+			return channel
+		},
+	}
 }
 func newChannelPool(connectionManager *ConnectionManager) func() interface{} {
 	return func() interface{} {
 		channel, err := connectionManager.conn.Channel()
 		if err != nil {
-			connectionManager.options.Logger.Errorf("failed to create new channel: %v", err)
+			connectionManager.options.Logger.Errorf("failed to create new ch: %v", err)
 			return nil
 		}
 		return channel

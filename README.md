@@ -1,16 +1,37 @@
 # go-rabbitmq-pool
-go对rabbitmq的一些封装
 
-已实现功能
+`go-rabbitmq-pool` 是一个用于封装 RabbitMQ 操作的 Go 语言库，提供了连接和通道的重连与复用功能，旨在提高 RabbitMQ 的使用效率和稳定性。
 
-1.Connection的重连复用
+## 已实现功能
 
-2.Loger对象的复用
+1. **Connection 的重连复用**
+    - 实现了连接的自动重连机制，确保在连接丢失后可以重新建立连接并继续操作。
 
-3.Channel的重连复用(基本框架)
+2. **Logger 对象的复用**
+    - 提供了 Logger 对象的复用功能，以便在不同的操作中保持一致的日志记录。
 
-TODO:
+3. **Channel 的重连复用**
+    - 实现了通道的自动重连机制，支持在通道断开后重新建立通道并继续使用。
 
-1.Channel的重连释放时还有bug
+4. **基础 Publish 的 Demo**
+    - 提供了一个简单的示例，展示如何使用复用的通道来发布消息。支持直连和路由两种方式。
 
-2.继续完善publish
+## TODO
+
+1. **Quene的重试创建持久化**
+    - 实现队列的持久化，并在创建队列失败时进行重试，以确保队列的可靠性。
+
+2. **完善 Publish 的发送 Demo**
+    - 继续完善发送消息的示例代码，实现直连和路由两种消息发送方式。
+
+3. **实现 Consume 的消费 Demo**
+    - 提供消费消息的示例代码，并实现相关参数配置，包括是否需要在释放时重置通道。
+
+## 使用说明
+
+### 安装
+
+使用 `go get` 安装 `go-rabbitmq-pool` 库：
+
+```sh
+go get github.com/yourusername/go-rabbitmq-pool
