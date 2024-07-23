@@ -34,4 +34,5 @@
 使用 `go get` 安装 `go-rabbitmq-pool` 库：
 
 ```sh
-go get github.com/yourusername/go-rabbitmq-pool
+
+go get github.com/whyy1/go-rabbitmq-pool
