@@ -1,4 +1,4 @@
-module go_rabbitmq_pool
+module github.com/whyy1/go-rabbitmq-pool
 
 go 1.22.4
 

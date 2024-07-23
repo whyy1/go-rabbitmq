@@ -1,7 +1,7 @@
 package main
 
 import (
-	"go_rabbitmq_pool/internal"
+	"github.com/whyy1/go-rabbitmq-pool/internal"
 )
 
 type Publisher struct {
