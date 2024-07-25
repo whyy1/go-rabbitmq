@@ -7,19 +7,21 @@ import (
 )
 
 type ConnectionManager struct {
-	source          string
-	conn            *amqp.Connection
-	connLocker      *sync.Mutex
-	options         ConnectionOptions
-	channelPool     sync.Pool
-	connNotifyClose chan *amqp.Error
+	source      string
+	conn        *amqp.Connection
+	connLocker  *sync.RWMutex
+	stopSignal  chan struct{} //通知全局Coon停止重连机制
+	options     ConnectionOptions
+	channelPool sync.Pool
 }
 
 func NewCoon(url string, opts ...func(*ConnectionOptions)) (connectionManager *ConnectionManager, err error) {
 	connectionManager = &ConnectionManager{
 		source:     url,
-		connLocker: &sync.Mutex{},
+		connLocker: &sync.RWMutex{},
+		stopSignal: make(chan struct{}, 1),
 		options:    SetDefaultConnectionOptions(), //设置默认的链接参数
+
 	}
 	//设置参数
 	for _, optFunc := range opts {
@@ -34,11 +36,13 @@ func NewCoon(url string, opts ...func(*ConnectionOptions)) (connectionManager *C
 	// 初始化 channelPool 的 New 函数
 	connectionManager.channelPool.New = newChannelPool(connectionManager)
 
-	go connectionManager.StartNotifyClose()
+	go connectionManager.startNotifyClose()
 
 	return connectionManager, nil
 }
-func (connectionManager *ConnectionManager) StartNotifyClose() {
+
+// 启动错误监听
+func (connectionManager *ConnectionManager) startNotifyClose() {
 	connNotifyClose := connectionManager.conn.NotifyClose(make(chan *amqp.Error, 1))
 	err := <-connNotifyClose
 	if err != nil {
@@ -50,25 +54,38 @@ func (connectionManager *ConnectionManager) StartNotifyClose() {
 	connectionManager.options.Logger.Infof("Coon closed normally.")
 }
 
+// 重连Coon循环
 func (connectionManager *ConnectionManager) reconnectCoonLoop() {
 	for {
+		connectionManager.connLocker.Lock()
 
-		if err := connectionManager.reconnect(); err != nil {
-			connectionManager.options.Logger.Errorf("Connection reconnect err=%v", err)
-			continue
+		select {
+		case <-connectionManager.stopSignal:
+			connectionManager.options.Logger.Infof("收到全局Coon停止，停止重连循环队列")
+
+			connectionManager.connLocker.Unlock()
+			return
+		default:
+			if err := connectionManager.reconnect(); err != nil {
+				connectionManager.options.Logger.Errorf("Connection reconnect err=%v", err)
+				connectionManager.connLocker.Unlock()
+				continue
+			}
+			//重新连接成功则启动监听器
+			go connectionManager.startNotifyClose()
+
+			connectionManager.connLocker.Unlock()
+			return
 		}
-		//重新连接成功则启动监听器
-		connectionManager.connNotifyClose = connectionManager.conn.NotifyClose(make(chan *amqp.Error, 1))
-		go connectionManager.StartNotifyClose()
-		return
 	}
 }
+
 func (connectionManager *ConnectionManager) reconnect() (err error) {
 	//等待指定时间后重新连接
 	connectionManager.options.Logger.Infof("%v Start reconnecting", connectionManager.options.ReconnectInterval)
 	time.Sleep(connectionManager.options.ReconnectInterval)
 	connectionManager.options.Logger.Infof("Start reconnecting")
-	coon, err := amqp.Dial(connectionManager.source)
+	newCoon, err := amqp.Dial(connectionManager.source)
 	if err != nil {
 		connectionManager.options.Logger.Errorf("Reconnecting Dial err=%v", err)
 		return err
@@ -81,11 +98,8 @@ func (connectionManager *ConnectionManager) reconnect() (err error) {
 			connectionManager.options.Logger.Errorf("Old Connection Close err=%v", err)
 		}
 	}
-	connectionManager.connLocker.Lock()
-	defer connectionManager.connLocker.Unlock()
 
-	connectionManager.conn = coon
-
+	connectionManager.conn = newCoon
 	connectionManager.clearChannelPool() //清空Channel协程池
 	return
 }
@@ -115,6 +129,13 @@ func newChannelPool(connectionManager *ConnectionManager) func() interface{} {
 }
 
 func (connectionManager *ConnectionManager) CoonClose() {
-	connectionManager.conn.Close()
-	//todo 需要关闭该connection下所有的Channel
+	//加锁保证即使正常关闭的时候，也要等上一次重连结束之后再关闭
+	connectionManager.connLocker.Lock()
+	defer connectionManager.connLocker.Unlock()
+	connectionManager.options.Logger.Errorf("coon主动关闭")
+	connectionManager.stopSignal <- struct{}{}
+	close(connectionManager.stopSignal)
+	if err := connectionManager.conn.Close(); err != nil {
+		connectionManager.options.Logger.Errorf("coon关闭失败 %v", err)
+	}
 }

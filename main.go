@@ -20,6 +20,7 @@ func main() {
 		fmt.Println(err)
 		return
 	}
+
 	//_, err = internal.NewChannelManager(coon)
 	//if err != nil {
 	//	return
@@ -30,9 +31,10 @@ func main() {
 		fmt.Println(err)
 		return
 	}
+
 	pubilsh.PublishWithContext("", "test", false, false, []byte("test"))
+	time.Sleep(8 * time.Second)
 	pubilsh.Close()
-	time.Sleep(5 * time.Second)
 
 	pubilsh1, err := NewPubilsh(coon)
 	if err != nil {
@@ -40,7 +42,7 @@ func main() {
 		return
 	}
 	pubilsh1.PublishWithContext("", "test", false, false, []byte("test1"))
-	pubilsh1.Close()
+	//pubilsh1.Close()
 	time.Sleep(2 * time.Second)
 
 	pubilsh2, err := NewPubilsh(coon)
@@ -49,7 +51,9 @@ func main() {
 		return
 	}
 	pubilsh2.PublishWithContext("", "test", false, false, []byte("test2"))
+	for {
 
+	}
 	forever := make(chan bool)
 	log.Printf(" [*] Waiting for messages. To exit press CTRL+C")
 	<-forever
