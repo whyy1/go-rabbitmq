@@ -6,16 +6,11 @@ import (
 	"github.com/whyy1/go-rabbitmq-pool/internal"
 	"os"
 	"runtime"
+	"testing"
 	"time"
 )
 
-var (
-	// 连接信息amqp://kuteng:kuteng@127.0.0.1:5672/kuteng
-	// 这个信息是固定不变的amqp://是固定参数后面两个是用户名密码ip地址端口号Virtual Host
-	source = os.Getenv("rabbitmqsource")
-)
-
-func main() {
+func TestNewPubilsh(t *testing.T) {
 	coon, err := internal.NewCoon(os.Getenv("rabbitmqsource"))
 	if err != nil {
 		fmt.Println(err)
@@ -63,8 +58,6 @@ func main() {
 		}
 		if err := pubilsh2.PublishWithContext(context.TODO(), []byte("test"), []string{"quene1", "quene2", "quene3"}); err != nil {
 			fmt.Println("pubilsh2 发送失败", err)
-		} else {
-			fmt.Println("pubilsh2 发送成功", err)
 		}
 	}
 
@@ -72,4 +65,5 @@ func main() {
 	//运行垃圾回收
 	runtime.GC()
 	fmt.Println("运行结束")
+
 }

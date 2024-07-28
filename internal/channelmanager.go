@@ -40,14 +40,6 @@ func NewChannelManager(connectionManager *ConnectionManager) (channelManager *Ch
 	return channelManager, nil
 }
 
-func (channelManager *ChannelManager) PublishWithContext(exchange string, key string, mandatory bool, immediate bool, data []byte) (err error) {
-	channelManager.ch.QueueDeclare(key, true, false, false, false, nil)
-	return channelManager.ch.Publish(exchange, key, mandatory, immediate, amqp.Publishing{
-		DeliveryMode: amqp.Persistent,
-		Body:         data,
-	})
-}
-
 // StartNotifyClose 监听Channel是否成功关闭，非正常关闭则重新连接
 func (channelManager *ChannelManager) startNotifyClose() {
 	channelNotifyClose := channelManager.ch.NotifyClose(make(chan *amqp.Error, 1))
@@ -63,64 +55,6 @@ func (channelManager *ChannelManager) startNotifyClose() {
 	channelManager.options.Logger.Infof("Channel正常关闭")
 
 }
-
-// 监听Manager状态，判断是否需要尝试重新连接Channel
-//func (channelManager *ChannelManager) startNotifyManagerClose() {
-//	for {
-//		select {
-//		case err := <-channelManager.channelManagerNotifyClose:
-//			switch err {
-//			case ChannelNormalShutdown: //channel被正常关闭
-//				channelManager.options.Logger.Infof("channel被正常关闭")
-//				return
-//			case ChannelUnexpectedShutdown:
-//				channelManager.reconnectCoonLoop()
-//			case ManagerClose: //正常关闭channelManager
-//				channelManager.options.Logger.Infof("正常关闭channelManager被正常关闭")
-//				return
-//			}
-//		}
-//	}
-//	//for {
-//	//	select {
-//	//	case err := <-channelNotifyClose:
-//	//		{
-//	//			if err != nil {
-//	//				channelManager.options.Logger.Errorf("Channel接收到非正常关闭%v", err)
-//	//				//非正常关闭
-//	//				channelManager.options.Logger.Errorf("channelNotifyClose err=%v", err)
-//	//				channelManager.reconnectCoonLoop()
-//	//				channelManager.channelManagerNotifyClose <- ChannelUnexpectedShutdown
-//	//				//return
-//	//			}
-//	//			channelManager.channelManagerNotifyClose <- ChannelNormalShutdown
-//	//			channelManager.options.Logger.Infof("Channel closed normally.")
-//	//		}
-//	//	case err := <-channelManager.channelManagerNotifyClose:
-//	//		{
-//	//			switch err {
-//	//			case ChannelNormalShutdown: //channel被正常关闭
-//	//				channelManager.options.Logger.Infof("channel被正常关闭")
-//	//				//return
-//	//			case ChannelUnexpectedShutdown:
-//	//				for {
-//	//					newChannel := getNewChannelPool(channelManager.connectionManager)
-//	//					if newChannel == nil {
-//	//						channelManager.options.Logger.Infof("channelManager接收重连自身channel失败，%v后重试", channelManager.options.ReconnectInterval)
-//	//						time.Sleep(channelManager.options.ReconnectInterval)
-//	//					}
-//	//					channelManager.options.Logger.Infof("channelManager接收重连自身channel成功")
-//	//					channelManager.ch = newChannel
-//	//					break
-//	//				}
-//	//			case ManagerClose: //正常关闭channelManager
-//	//				channelManager.options.Logger.Infof("正常关闭channelManager被正常关闭")
-//	//				//return
-//	//			}
-//	//		}
-//	//	}
-//	//}
-//}
 
 // 不断循环尝试重新连接Channel
 func (channelManager *ChannelManager) reconnectCoonLoop() {
@@ -195,6 +129,7 @@ func (channelManager *ChannelManager) CloseChannel() {
 	//将引用对象置空
 	//channelManager.ch = nil
 	//channelManager.connectionManager = nil
+	channelManager.options.Logger.Warnf("channel关闭")
 	if err := channelManager.ch.Close(); err != nil {
 		channelManager.options.Logger.Errorf("channel关闭失败 %v", err)
 	}

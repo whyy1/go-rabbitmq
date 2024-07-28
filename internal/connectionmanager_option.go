@@ -11,7 +11,7 @@ type ConnectionOptions struct {
 	//Config            Config
 }
 
-func SetDefaultConnectionOptions() (options ConnectionOptions) {
+func setDefaultConnectionOptions() ConnectionOptions {
 	logger, _ := zap.NewProduction()
 	//defer logger.Sync() // flushes buffer, if any
 	return ConnectionOptions{
@@ -29,4 +29,8 @@ func SetLogger(logger Logger) func(options *ConnectionOptions) {
 	return func(options *ConnectionOptions) {
 		options.Logger = logger
 	}
+}
+
+func (connectionManager *ConnectionManager) GetConnectionOptions() ConnectionOptions {
+	return connectionManager.options
 }

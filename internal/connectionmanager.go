@@ -20,7 +20,7 @@ func NewCoon(url string, opts ...func(*ConnectionOptions)) (connectionManager *C
 		source:     url,
 		connLocker: &sync.RWMutex{},
 		stopSignal: make(chan struct{}, 1),
-		options:    SetDefaultConnectionOptions(), //设置默认的链接参数
+		options:    setDefaultConnectionOptions(), //设置默认的链接参数
 
 	}
 	//设置参数
@@ -117,6 +117,8 @@ func (connectionManager *ConnectionManager) clearChannelPool() {
 		},
 	}
 }
+
+// Pool方式
 func newChannelPool(connectionManager *ConnectionManager) func() interface{} {
 	return func() interface{} {
 		channel, err := connectionManager.conn.Channel()
@@ -127,6 +129,11 @@ func newChannelPool(connectionManager *ConnectionManager) func() interface{} {
 		return channel
 	}
 }
+
+//// 正常创建方法
+//func (connectionManager *ConnectionManager) newChannel() (*amqp.Channel, error) {
+//	return connectionManager.conn.Channel()
+//}
 
 func (connectionManager *ConnectionManager) CoonClose() {
 	//加锁保证即使正常关闭的时候，也要等上一次重连结束之后再关闭
