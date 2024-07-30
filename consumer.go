@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"errors"
+	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/whyy1/go-rabbitmq-pool/internal"
 )
 
@@ -25,10 +27,6 @@ func NewConsumer(connectionManager *internal.ConnectionManager, optionFuncs ...f
 		return nil, err
 	}
 
-	if err := declareExchange(chanManager, options.ExchangeOptions); err != nil {
-		return nil, err
-	}
-
 	consumer = &Consumer{
 		connectionManager: connectionManager,
 		chanManager:       chanManager,
@@ -36,6 +34,30 @@ func NewConsumer(connectionManager *internal.ConnectionManager, optionFuncs ...f
 	}
 
 	return
+}
+
+func (consumer *Consumer) GetConsumeChannel(
+	ctx context.Context,
+) (<-chan amqp.Delivery, error) {
+
+	if err := declareQuene(consumer.chanManager, consumer.options.QueueOptions); err != nil {
+		return nil, err
+	}
+
+	if err := declareExchange(consumer.chanManager, consumer.options.ExchangeOptions); err != nil {
+		return nil, err
+	}
+
+	return consumer.chanManager.ConsumeWithContextSafe(
+		ctx,
+		consumer.options.QueueOptions.Name,
+		consumer.options.ConsumOptions.Name,
+		consumer.options.ConsumOptions.AutoAck,
+		consumer.options.ConsumOptions.Exclusive,
+		consumer.options.ConsumOptions.NoLocal,
+		consumer.options.ConsumOptions.NoWait,
+		consumer.options.ConsumOptions.Args,
+	)
 }
 
 func (consumer *Consumer) Close() {

@@ -18,6 +18,7 @@ func NewPubilsh(connectionManager *internal.ConnectionManager, optionFuncs ...fu
 	if connectionManager == nil {
 		return nil, errors.New("connectionManager is nil")
 	}
+
 	options := WithDefaultPublishOptionsOptions()
 	for _, optionFunc := range optionFuncs {
 		optionFunc(&options)

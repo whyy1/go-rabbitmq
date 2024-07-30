@@ -7,12 +7,6 @@ import (
 	"time"
 )
 
-const (
-	ChannelNormalShutdown     ChannelManagerError = "ChannelNormalShutdown"
-	ChannelUnexpectedShutdown ChannelManagerError = "ChannelUnexpectedShutdown"
-	ManagerClose              ChannelManagerError = "ManagerClose"
-)
-
 type ChannelManagerError string
 type ChannelManager struct {
 	connectionManager *ConnectionManager
@@ -22,7 +16,7 @@ type ChannelManager struct {
 	options           ConnectionOptions
 }
 
-func NewChannelManager(connectionManager *ConnectionManager, opts ...func(*ConnectionOptions)) (channelManager *ChannelManager, err error) {
+func NewChannelManager(connectionManager *ConnectionManager) (channelManager *ChannelManager, err error) {
 	channelManager = &ChannelManager{
 		connectionManager: connectionManager,
 		chLocker:          &sync.RWMutex{},

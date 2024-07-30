@@ -94,3 +94,17 @@ func (channelManager *ChannelManager) PublishWithContextSafe(
 
 	return channelManager.ch.PublishWithContext(ctx, exchange, key, mandatory, immediate, msg)
 }
+func (channelManager *ChannelManager) ConsumeWithContextSafe(
+	ctx context.Context,
+	name string, // 队列名称，从该队列中消费消息
+	consumer string, //消费者标签，用于区分不同的消费者
+	autoAck bool, //自动确认消息，如果为 true，则消息被消费后自动确认
+	exclusive bool, //是否独占队列，如果为 true，则该队列只能被此消费者消费
+	noLocal bool, //如果为 true，则服务器不会将发布到同一连接的消息传递给这个消费者
+	noWait bool, //是否阻塞处理，如果为 true，声明队列时不会等待服务器的响应
+	args amqp.Table, //额外的属性，用于扩展功能
+) (<-chan amqp.Delivery, error) {
+	channelManager.chLocker.RLock()
+	defer channelManager.chLocker.RUnlock()
+	return channelManager.ch.ConsumeWithContext(ctx, name, consumer, autoAck, exclusive, noLocal, noWait, args)
+}
