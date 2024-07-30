@@ -11,7 +11,7 @@ type ConnectionOptions struct {
 	//Config            Config
 }
 
-func setDefaultConnectionOptions() ConnectionOptions {
+func withDefaultConnectionOptions() ConnectionOptions {
 	logger, _ := zap.NewProduction()
 	//defer logger.Sync() // flushes buffer, if any
 	return ConnectionOptions{
@@ -20,17 +20,13 @@ func setDefaultConnectionOptions() ConnectionOptions {
 	}
 }
 
-func SetReconnectInterval(interval time.Duration) func(options *ConnectionOptions) {
+func WithConnectionReconnectInterval(interval time.Duration) func(options *ConnectionOptions) {
 	return func(options *ConnectionOptions) {
 		options.ReconnectInterval = interval
 	}
 }
-func SetLogger(logger Logger) func(options *ConnectionOptions) {
+func WithConnectionLogger(logger Logger) func(options *ConnectionOptions) {
 	return func(options *ConnectionOptions) {
 		options.Logger = logger
 	}
-}
-
-func (connectionManager *ConnectionManager) GetConnectionOptions() ConnectionOptions {
-	return connectionManager.options
 }

@@ -3,45 +3,24 @@ package main
 import (
 	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/whyy1/go-rabbitmq-pool/internal"
+	"go.uber.org/zap"
 	"time"
 )
 
-// ExchangeOptions are used to configure an exchange.
-// If the Passive flag is set the client will only check if the exchange exists on the server
-// and that the settings match, no creation attempt will be made.
-type ExchangeOptions struct {
-	Name       string
-	Kind       string // possible values: empty string for default exchange or direct, topic, fanout
-	Durable    bool
-	AutoDelete bool
-	Internal   bool
-	NoWait     bool
-	Passive    bool // if false, a missing exchange will be created on the server
-	Args       amqp.Table
-	Declare    bool
-	//Bindings   []amqp.Binding
-}
 type PublisherOptions struct {
 	ReconnectInterval time.Duration
 	Logger            internal.Logger
 	ExchangeOptions   ExchangeOptions
 }
 
-func WithDefaultPublishOptionsOptions(connectionOptions *internal.ConnectionOptions) (options PublisherOptions) {
+func WithDefaultPublishOptionsOptions() (options PublisherOptions) {
+	logger, _ := zap.NewProduction()
+	//defer logger.Sync() // flushes buffer, if any
+
 	return PublisherOptions{
-		ReconnectInterval: connectionOptions.ReconnectInterval,
-		Logger:            connectionOptions.Logger,
-		ExchangeOptions: ExchangeOptions{
-			Name:       "",
-			Kind:       amqp.ExchangeDirect,
-			Durable:    false,
-			AutoDelete: false,
-			Internal:   false,
-			NoWait:     false,
-			Passive:    false,
-			Args:       amqp.Table{},
-			Declare:    false,
-		},
+		ReconnectInterval: 5 * time.Second,
+		Logger:            logger.Sugar(),
+		ExchangeOptions:   getExchangeOptions(),
 	}
 }
 
@@ -53,5 +32,56 @@ func WithReconnectInterval(interval time.Duration) func(options *PublisherOption
 func WithLogger(logger internal.Logger) func(options *PublisherOptions) {
 	return func(options *PublisherOptions) {
 		options.Logger = logger
+	}
+}
+
+// WithPublisherOptionsExchangeName sets the exchange name
+func WithPublisherOptionsExchangeName(name string) func(*PublisherOptions) {
+	return func(options *PublisherOptions) {
+		options.ExchangeOptions.Name = name
+	}
+}
+
+// WithPublisherOptionsExchangeKind ensures the queue is a durable queue
+func WithPublisherOptionsExchangeKind(kind string) func(*PublisherOptions) {
+	return func(options *PublisherOptions) {
+		options.ExchangeOptions.Kind = kind
+	}
+}
+
+// WithPublisherOptionsExchangeDurable ensures the exchange is a durable exchange
+func WithPublisherOptionsExchangeDurable(options *PublisherOptions) {
+	options.ExchangeOptions.Durable = true
+}
+
+// WithPublisherOptionsExchangeAutoDelete ensures the exchange is an auto-delete exchange
+func WithPublisherOptionsExchangeAutoDelete(options *PublisherOptions) {
+	options.ExchangeOptions.AutoDelete = true
+}
+
+// WithPublisherOptionsExchangeInternal ensures the exchange is an internal exchange
+func WithPublisherOptionsExchangeInternal(options *PublisherOptions) {
+	options.ExchangeOptions.Internal = true
+}
+
+// WithPublisherOptionsExchangeNoWait ensures the exchange is a no-wait exchange
+func WithPublisherOptionsExchangeNoWait(options *PublisherOptions) {
+	options.ExchangeOptions.NoWait = true
+}
+
+// WithPublisherOptionsExchangeDeclare will create the exchange if it doesn't exist
+func WithPublisherOptionsExchangeDeclare(options *PublisherOptions) {
+	options.ExchangeOptions.Declare = true
+}
+
+// WithPublisherOptionsExchangePassive ensures the exchange is a passive exchange
+func WithPublisherOptionsExchangePassive(options *PublisherOptions) {
+	options.ExchangeOptions.Passive = true
+}
+
+// WithPublisherOptionsExchangeArgs adds optional args to the exchange
+func WithPublisherOptionsExchangeArgs(args amqp.Table) func(*PublisherOptions) {
+	return func(options *PublisherOptions) {
+		options.ExchangeOptions.Args = args
 	}
 }

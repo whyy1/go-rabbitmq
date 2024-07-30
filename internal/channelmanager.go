@@ -22,7 +22,7 @@ type ChannelManager struct {
 	options           ConnectionOptions
 }
 
-func NewChannelManager(connectionManager *ConnectionManager) (channelManager *ChannelManager, err error) {
+func NewChannelManager(connectionManager *ConnectionManager, opts ...func(*ConnectionOptions)) (channelManager *ChannelManager, err error) {
 	channelManager = &ChannelManager{
 		connectionManager: connectionManager,
 		chLocker:          &sync.RWMutex{},

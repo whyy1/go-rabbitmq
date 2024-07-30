@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/rabbitmq/amqp091-go"
 	"github.com/whyy1/go-rabbitmq-pool/internal"
 	"go.uber.org/zap"
@@ -15,20 +14,27 @@ type Publisher struct {
 	options           PublisherOptions
 }
 
-func NewPubilsh(connectionManager *internal.ConnectionManager) (publisher *Publisher, err error) {
+func NewPubilsh(connectionManager *internal.ConnectionManager, optionFuncs ...func(*PublisherOptions)) (publisher *Publisher, err error) {
 	if connectionManager == nil {
 		return nil, errors.New("connectionManager is nil")
 	}
-	defaultOptions := connectionManager.GetConnectionOptions()
+	options := WithDefaultPublishOptionsOptions()
+	for _, optionFunc := range optionFuncs {
+		optionFunc(&options)
+	}
 
 	chanManager, err := internal.NewChannelManager(connectionManager)
 	if err != nil {
 		return nil, err
 	}
+	if err := declareExchange(chanManager, options.ExchangeOptions); err != nil {
+		return nil, err
+	}
+
 	publisher = &Publisher{
 		connectionManager: connectionManager,
 		chanManager:       chanManager,
-		options:           WithDefaultPublishOptionsOptions(&defaultOptions),
+		options:           options,
 	}
 
 	return
@@ -41,10 +47,11 @@ func (publisher *Publisher) PublishWithContext(
 	optionFuncs ...func(*PublishOptions),
 ) error {
 
-	options := &PublishOptions{}
+	options := PublishOptions{}
 	for _, optionFunc := range optionFuncs {
-		optionFunc(options)
+		optionFunc(&options)
 	}
+
 	message := amqp091.Publishing{
 		Headers:         options.Headers,
 		ContentType:     options.ContentType,
@@ -63,9 +70,6 @@ func (publisher *Publisher) PublishWithContext(
 	}
 
 	for _, routingKey := range routingKeys {
-		//if err := publisher.chanManager.QueueDeclareSafe(routingKey, false, false, false, false, nil); err != nil {
-		//	return err
-		//}
 		message.Body = data
 
 		if err := publisher.chanManager.PublishWithContextSafe(
@@ -79,7 +83,7 @@ func (publisher *Publisher) PublishWithContext(
 			return err
 		}
 	}
-	fmt.Println("消息发送成功")
+
 	publisher.options.Logger.Errorf("消息发送成功")
 	return nil
 }

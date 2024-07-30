@@ -20,7 +20,7 @@ func NewCoon(url string, opts ...func(*ConnectionOptions)) (connectionManager *C
 		source:     url,
 		connLocker: &sync.RWMutex{},
 		stopSignal: make(chan struct{}, 1),
-		options:    setDefaultConnectionOptions(), //设置默认的链接参数
+		options:    withDefaultConnectionOptions(), //设置默认的链接参数
 
 	}
 	//设置参数
