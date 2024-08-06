@@ -16,26 +16,34 @@
 4. **基础 Publish 的 Demo**
    - 提供了一个简单的示例，展示如何使用复用的通道来发布消息。支持直连和路由两种方式。
    - 已实现Publish的多个发送并能够成功重连发送
+   - 提供Simple模式Demo
 
 5. **Quene的重试创建持久化**
    - 提供了一个简单的示例，展示如何使用复用的通道来发布消息。支持直连和路由两种方式。
 
-6 **Consume的结构创建和消费函数定义**
-   - 提供了一个简单的示例，展示如何使用复用的通道来发布消息。支持直连和路由两种方式。
+6 **Consume封装以及参数的选项设计模式函数定义**
+   - 提供了一个对Consume的封装，能够实现Connection的复用，Consumer独占Channel通道来消费消息。
+   - 已经实现重连机制以及自动声明交换机和队列
+   - 提供Simple模式Demo
    
 
 ## TODO
 
 1. **Log传递优化**
-    - log不知道为什么会输出突然停止，但是一直在发送
+    - log输出会突然停止，但是一直在发送
 
 2. **完善 Publish 的发送 Demo**
-    - 继续完善发送消息的示例代码，实现直连和路由两种消息发送方式。
+    - work模式dome
+    - Publish模式dome
+    - Routing模式dome
+    - Topic模式dome
 
 3. **实现 Consume 的消费 Demo**
    - ~~提供消费消息的示例代码，并实现相关参数配置，包括是否需要在释放时重置通道。~~(已实现结构定义，消费函数实现)
-   - 缺少dome测试
-   - 初始化参数未完整，quene、
+   - work模式dome
+   - Publish模式dome
+   - Routing模式dome
+   - Topic模式dome
    
 4. **Channel是否需要来维护sync.Pool**
    - ~~如果继续按这个方法实现，要将channel重连状态单独为，在ConnectionManager上层统一维护所有channel状态~~

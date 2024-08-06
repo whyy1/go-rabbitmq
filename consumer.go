@@ -22,6 +22,7 @@ func NewConsumer(connectionManager *internal.ConnectionManager, optionFuncs ...f
 	for _, optionFunc := range optionFuncs {
 		optionFunc(&options)
 	}
+
 	chanManager, err := internal.NewChannelManager(connectionManager)
 	if err != nil {
 		return nil, err
@@ -38,7 +39,12 @@ func NewConsumer(connectionManager *internal.ConnectionManager, optionFuncs ...f
 
 func (consumer *Consumer) GetConsumeChannel(
 	ctx context.Context,
+	optionFuncs ...func(*ConsumeOptions),
 ) (<-chan amqp.Delivery, error) {
+
+	for _, optionFunc := range optionFuncs {
+		optionFunc(&consumer.options.ConsumeOptions)
+	}
 
 	if err := declareQuene(consumer.chanManager, consumer.options.QueueOptions); err != nil {
 		return nil, err
@@ -51,12 +57,12 @@ func (consumer *Consumer) GetConsumeChannel(
 	return consumer.chanManager.ConsumeWithContextSafe(
 		ctx,
 		consumer.options.QueueOptions.Name,
-		consumer.options.ConsumOptions.Name,
-		consumer.options.ConsumOptions.AutoAck,
-		consumer.options.ConsumOptions.Exclusive,
-		consumer.options.ConsumOptions.NoLocal,
-		consumer.options.ConsumOptions.NoWait,
-		consumer.options.ConsumOptions.Args,
+		consumer.options.ConsumeOptions.Name,
+		consumer.options.ConsumeOptions.AutoAck,
+		consumer.options.ConsumeOptions.Exclusive,
+		consumer.options.ConsumeOptions.NoLocal,
+		consumer.options.ConsumeOptions.NoWait,
+		consumer.options.ConsumeOptions.Args,
 	)
 }
 

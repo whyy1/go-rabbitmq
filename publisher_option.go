@@ -20,7 +20,7 @@ func WithDefaultPublishOptionsOptions() (options PublisherOptions) {
 	return PublisherOptions{
 		ReconnectInterval: 5 * time.Second,
 		Logger:            logger.Sugar(),
-		ExchangeOptions:   getExchangeOptions(),
+		ExchangeOptions:   getDefaultExchangeOptions(),
 	}
 }
 

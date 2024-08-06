@@ -21,7 +21,7 @@ type ExchangeOptions struct {
 	Bindings   []string   // 绑定：交换机的绑定键列表
 }
 
-func getExchangeOptions() ExchangeOptions {
+func getDefaultExchangeOptions() ExchangeOptions {
 	return ExchangeOptions{
 		Name:       "",
 		Kind:       amqp.ExchangeDirect,
