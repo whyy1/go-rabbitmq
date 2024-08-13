@@ -1,6 +1,6 @@
-# go-rabbitmq-pool
+# go-rabbitmq
 
-`go-rabbitmq-pool` 是一个用于封装 RabbitMQ 操作的 Go 语言库，提供了连接和通道的重连与复用功能，旨在提高 RabbitMQ 的使用效率和稳定性。
+`go-rabbitmq` 是一个用于封装 RabbitMQ 操作的 Go 语言库，提供了连接和通道的重连与复用功能，旨在提高 RabbitMQ 的使用效率和稳定性。
 
 ## 已实现功能
 
@@ -58,4 +58,4 @@
 
 ```sh
 
-go get github.com/whyy1/go-rabbitmq-pool
+go get github.com/whyy1/go-rabbitmq
