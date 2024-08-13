@@ -85,7 +85,6 @@ func (publisher *Publisher) PublishWithContext(
 		}
 	}
 
-	publisher.options.Logger.Errorf("消息发送成功")
 	return nil
 }
 

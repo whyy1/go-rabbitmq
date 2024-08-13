@@ -33,28 +33,30 @@
     - log输出会突然停止，但是一直在发送
 
 2. **完善 Publish 的发送 Demo**
-    - work模式dome
-    - Publish模式dome
+   - [x] simple模式dome
+   - [x] work模式dome
+   - [x] Publish模式dome
     - Routing模式dome
     - Topic模式dome
 
 3. **实现 Consume 的消费 Demo**
    - ~~提供消费消息的示例代码，并实现相关参数配置，包括是否需要在释放时重置通道。~~(已实现结构定义，消费函数实现)
-   - work模式dome
-   - Publish模式dome
+   - [x] simple模式dome
+   - [x] work模式dome
+   - [x] Publish模式dome
    - Routing模式dome
    - Topic模式dome
+   - 并发情况下多消费者重连机制有误
    
 4. **Channel是否需要来维护sync.Pool**
    - ~~如果继续按这个方法实现，要将channel重连状态单独为，在ConnectionManager上层统一维护所有channel状态~~
    - 修改为正常创建独享
 
-
 ## 使用说明
 
 ### 安装
 
-使用 `go get` 安装 `go-rabbitmq-pool` 库：
+使用 `go get` 安装 `go-rabbitmq` 库：
 
 ```sh
 

@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func TestNewPubilsh(t *testing.T) {
+func TestPubilshSimple(t *testing.T) {
 	coon, err := internal.NewCoon(os.Getenv("rabbitmqsource"))
 	if err != nil {
 		fmt.Println(err)

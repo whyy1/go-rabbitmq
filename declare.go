@@ -32,14 +32,14 @@ func declareExchange(channelManager *internal.ChannelManager, options ExchangeOp
 		options.Args,
 	)
 }
-func declareQuene(channelManager *internal.ChannelManager, options QueueOptions) error {
+func declareQuene(channelManager *internal.ChannelManager, options *QueueOptions) error {
 	if !options.Declare {
 		return nil
 	}
 
 	if options.Passive {
 
-		return channelManager.QueueDeclarePassiveSafe(
+		queneName, err := channelManager.QueueDeclarePassiveSafe(
 			options.Name,
 			options.Durable,
 			options.AutoDelete,
@@ -47,14 +47,40 @@ func declareQuene(channelManager *internal.ChannelManager, options QueueOptions)
 			options.NoWait,
 			options.Args,
 		)
+		if err != nil {
+			return err
+		} else {
+			options.Name = queneName
+			return nil
+		}
 	}
 
-	return channelManager.QueueDeclareSafe(
+	queneName, err := channelManager.QueueDeclareSafe(
 		options.Name,
 		options.Durable,
 		options.AutoDelete,
 		options.Exclusive,
 		options.NoWait,
 		options.Args,
+	)
+	if err != nil {
+		return err
+	} else {
+		options.Name = queneName
+		return nil
+	}
+}
+
+func queneBind(channelManager *internal.ChannelManager, queueBindOptions QueueBindOptions) error {
+	if !queueBindOptions.Bind {
+		return nil
+	}
+
+	return channelManager.ConsumeQueneBindSafe(
+		queueBindOptions.Name,
+		queueBindOptions.Key,
+		queueBindOptions.Exchange,
+		queueBindOptions.NoWait,
+		queueBindOptions.Args,
 	)
 }

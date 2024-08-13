@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func TestNewConsumer(t *testing.T) {
+func TestConsumerSimple(t *testing.T) {
 	coon, err := internal.NewCoon(os.Getenv("rabbitmqsource"))
 	if err != nil {
 		log.Println(err)

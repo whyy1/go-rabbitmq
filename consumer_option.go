@@ -13,6 +13,7 @@ type ConsumerOptions struct {
 	ExchangeOptions   ExchangeOptions
 	QueueOptions      QueueOptions
 	ConsumeOptions    ConsumeOptions
+	QueueBindOptions  QueueBindOptions
 }
 
 type QueueOptions struct {
@@ -24,6 +25,15 @@ type QueueOptions struct {
 	Passive    bool
 	Args       amqp.Table //额外的属性
 	Declare    bool
+}
+
+type QueueBindOptions struct {
+	Name     string     //队列名称， 要绑定的队列名称。
+	Key      string     // 指定消息的路由键。交换机会根据这个键来决定将消息发送到哪个队列。
+	Exchange string     //指定将要绑定的交换机名称。消息将从这个交换机路由到绑定的队列。
+	NoWait   bool       //如果设置为 true，表示不等待服务器的响应。绑定操作立即返回，不会确认绑定是否成功。
+	Args     amqp.Table //传递一些额外的绑定参数，可以用于配置更复杂的绑定规则或扩展功能。例如，可以设置绑定的优先级等
+	Bind     bool       //是否绑定至交换机
 }
 
 func WithDefaultConsumerOptions() (options ConsumerOptions) {
@@ -138,5 +148,10 @@ func WithConsumerQueueArgs(args amqp.Table) func(options *ConsumerOptions) {
 func WithConsumerQueueDeclare(declare bool) func(options *ConsumerOptions) {
 	return func(options *ConsumerOptions) {
 		options.QueueOptions.Declare = declare
+	}
+}
+func WithConsumerQueueBind(bind bool) func(options *ConsumerOptions) {
+	return func(options *ConsumerOptions) {
+		options.QueueBindOptions.Bind = bind
 	}
 }

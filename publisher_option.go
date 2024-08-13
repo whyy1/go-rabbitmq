@@ -50,33 +50,45 @@ func WithPublisherOptionsExchangeKind(kind string) func(*PublisherOptions) {
 }
 
 // WithPublisherOptionsExchangeDurable ensures the exchange is a durable exchange
-func WithPublisherOptionsExchangeDurable(options *PublisherOptions) {
-	options.ExchangeOptions.Durable = true
+func WithPublisherOptionsExchangeDurable(durable bool) func(*PublisherOptions) {
+	return func(options *PublisherOptions) {
+		options.ExchangeOptions.Durable = durable
+	}
 }
 
 // WithPublisherOptionsExchangeAutoDelete ensures the exchange is an auto-delete exchange
-func WithPublisherOptionsExchangeAutoDelete(options *PublisherOptions) {
-	options.ExchangeOptions.AutoDelete = true
+func WithPublisherOptionsExchangeAutoDelete(autoDelete bool) func(*PublisherOptions) {
+	return func(options *PublisherOptions) {
+		options.ExchangeOptions.AutoDelete = autoDelete
+	}
 }
 
 // WithPublisherOptionsExchangeInternal ensures the exchange is an internal exchange
-func WithPublisherOptionsExchangeInternal(options *PublisherOptions) {
-	options.ExchangeOptions.Internal = true
+func WithPublisherOptionsExchangeInternal(Internal bool) func(*PublisherOptions) {
+	return func(options *PublisherOptions) {
+		options.ExchangeOptions.Internal = Internal
+	}
 }
 
 // WithPublisherOptionsExchangeNoWait ensures the exchange is a no-wait exchange
-func WithPublisherOptionsExchangeNoWait(options *PublisherOptions) {
-	options.ExchangeOptions.NoWait = true
+func WithPublisherOptionsExchangeNoWait(noWait bool) func(*PublisherOptions) {
+	return func(options *PublisherOptions) {
+		options.ExchangeOptions.NoWait = noWait
+	}
 }
 
 // WithPublisherOptionsExchangeDeclare will create the exchange if it doesn't exist
-func WithPublisherOptionsExchangeDeclare(options *PublisherOptions) {
-	options.ExchangeOptions.Declare = true
+func WithPublisherOptionsExchangeDeclare(declare bool) func(*PublisherOptions) {
+	return func(options *PublisherOptions) {
+		options.ExchangeOptions.Declare = declare
+	}
 }
 
 // WithPublisherOptionsExchangePassive ensures the exchange is a passive exchange
-func WithPublisherOptionsExchangePassive(options *PublisherOptions) {
-	options.ExchangeOptions.Passive = true
+func WithPublisherOptionsExchangePassive(passive bool) func(*PublisherOptions) {
+	return func(options *PublisherOptions) {
+		options.ExchangeOptions.Passive = passive
+	}
 }
 
 // WithPublisherOptionsExchangeArgs adds optional args to the exchange

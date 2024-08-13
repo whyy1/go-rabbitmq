@@ -22,8 +22,8 @@ func (channelManager *ChannelManager) ExchangeDeclareSafe(
 	return channelManager.ch.ExchangeDeclare(name, kind, durable, autoDelete, internal, noWait, args)
 }
 
-// ExchangeDeclarePassiveSafe 用于检查交换机是否存在。如果交换机不存在，会返回一个错误
-// 不会创建新的交换机。仅用于检查交换机是否存在以及是否与给定参数匹配。如果交换机不存在或者参数不匹配，会返回一个错误
+// ExchangeDeclarePassiveSafe 用于检查交换机是否存会返回一个错误
+// 不会创建新的交换机。仅用于检查交换机是否存在以及是否与在。
 func (channelManager *ChannelManager) ExchangeDeclarePassiveSafe(
 	name string, // 交换机名称
 	kind string, // 交换机类型
@@ -48,16 +48,16 @@ func (channelManager *ChannelManager) QueueDeclareSafe(
 	exclusive bool, //是否具有排他性
 	noWait bool, //是否阻塞处理
 	args amqp.Table, //额外的属性
-) error {
+) (string, error) {
 	channelManager.chLocker.RLock()
 	defer channelManager.chLocker.RUnlock()
 
-	_, err := channelManager.ch.QueueDeclare(name, durable, autoDelete, exclusive, noWait, args)
+	quene, err := channelManager.ch.QueueDeclare(name, durable, autoDelete, exclusive, noWait, args)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return err
+	return quene.Name, nil
 }
 
 // QueueDeclarePassiveSafe 用于声明一个队列。如果队列不存在，会创建一个新的队列
@@ -69,16 +69,16 @@ func (channelManager *ChannelManager) QueueDeclarePassiveSafe(
 	exclusive bool, //是否具有排他性
 	noWait bool, //是否阻塞处理
 	args amqp.Table, //额外的属性
-) error {
+) (string, error) {
 	channelManager.chLocker.RLock()
 	defer channelManager.chLocker.RUnlock()
 
-	_, err := channelManager.ch.QueueDeclarePassive(name, durable, autoDelete, exclusive, noWait, args)
+	quene, err := channelManager.ch.QueueDeclarePassive(name, durable, autoDelete, exclusive, noWait, args)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return err
+	return quene.Name, nil
 }
 
 func (channelManager *ChannelManager) PublishWithContextSafe(
@@ -107,4 +107,17 @@ func (channelManager *ChannelManager) ConsumeWithContextSafe(
 	channelManager.chLocker.RLock()
 	defer channelManager.chLocker.RUnlock()
 	return channelManager.ch.ConsumeWithContext(ctx, name, consumer, autoAck, exclusive, noLocal, noWait, args)
+}
+
+func (channelManager *ChannelManager) ConsumeQueneBindSafe(
+	name string, // 队列名称， 要绑定的队列名称。
+	key string, // 指定消息的路由键。交换机会根据这个键来决定将消息发送到哪个队列。
+	exchange string, //指定将要绑定的交换机名称。消息将从这个交换机路由到绑定的队列。
+	noWait bool, //如果设置为 true，表示不等待服务器的响应。绑定操作立即返回，不会确认绑定是否成功。
+	args amqp.Table, //传递一些额外的绑定参数，可以用于配置更复杂的绑定规则或扩展功能。例如，可以设置绑定的优先级等。
+) error {
+	channelManager.chLocker.RLock()
+	defer channelManager.chLocker.RUnlock()
+
+	return channelManager.ch.QueueBind(name, key, exchange, noWait, args)
 }
