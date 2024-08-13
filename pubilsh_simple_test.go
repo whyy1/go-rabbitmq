@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/whyy1/go-rabbitmq-pool/internal"
+	"github.com/whyy1/go-rabbitmq/internal"
 	"os"
 	"os/signal"
 	"runtime"

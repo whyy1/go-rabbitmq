@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/whyy1/go-rabbitmq-pool/internal"
+	"github.com/whyy1/go-rabbitmq/internal"
 )
 
 func declareExchange(channelManager *internal.ChannelManager, options ExchangeOptions) error {

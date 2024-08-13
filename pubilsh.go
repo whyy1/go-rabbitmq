@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/rabbitmq/amqp091-go"
-	"github.com/whyy1/go-rabbitmq-pool/internal"
+	"github.com/whyy1/go-rabbitmq/internal"
 	"go.uber.org/zap"
 )
 

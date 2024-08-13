@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"github.com/whyy1/go-rabbitmq-pool/internal"
+	"github.com/whyy1/go-rabbitmq/internal"
 	"log"
 	"os"
 	"testing"
