@@ -19,6 +19,7 @@
    - 提供Simple模式Demo
    - 提供Work模式Demo
    - 提供Publish模式Demo
+   - 提供Routing模式dome
 
 5. **Quene的重试创建持久化**
    - 提供了一个简单的示例，展示如何使用复用的通道来发布消息。支持直连和路由两种方式。
@@ -28,6 +29,7 @@
    - 已经实现重连机制以及自动声明交换机和队列
    - 提供Simple模式Demo
    - 提供Publish模式Demo
+   - 提供Routing模式dome
    
 
 ## TODO
@@ -39,7 +41,7 @@
    - [x] simple模式dome
    - [x] work模式dome
    - [x] Publish模式dome
-    - Routing模式dome
+   - [x] Routing模式dome
     - Topic模式dome
 
 3. **实现 Consume 的消费 Demo**
@@ -47,7 +49,7 @@
    - [x] simple模式dome
    - [x] work模式dome
    - [x] Publish模式dome
-   - Routing模式dome
+   - [x] Routing模式dome
    - Topic模式dome
    - [x] 并发情况下多消费者重连机制有误
    
