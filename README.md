@@ -45,6 +45,7 @@
    - [x] Publish模式dome
    - [x] Routing模式dome
    - [x] Topic模式dome
+   -  Rpc模式dome
 
 3. **实现 Consume 的消费 Demo**
    - ~~提供消费消息的示例代码，并实现相关参数配置，包括是否需要在释放时重置通道。~~(已实现结构定义，消费函数实现)
@@ -53,7 +54,8 @@
    - [x] Publish模式dome
    - [x] Routing模式dome
    - [x] Topic模式dome
-   - [x] 并发情况下多消费者重连机制有误
+   - [x] 并发情况下多消费者重连机制
+   -  Rpc模式dome
    
 4. **Channel是否需要来维护sync.Pool**
    - ~~如果继续按这个方法实现，要将channel重连状态单独为，在ConnectionManager上层统一维护所有channel状态~~
