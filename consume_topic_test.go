@@ -25,6 +25,9 @@ func TestConsumerTopic(t *testing.T) {
 					WithConsumerQueueAutoDelete(true),
 					WithConsumerQueueDeclare(true),
 					WithConsumerExchangeName("topic"),
+					WithConsumerExchangeKind("topic"),
+					WithConsumerExchangeDeclare(true),
+					WithConsumerExchangeDurable(true),
 					WithConsumerBindKey(key),
 					WithConsumerBind(true),
 				)
@@ -57,6 +60,9 @@ func TestConsumerTopic(t *testing.T) {
 					WithConsumerQueueAutoDelete(true),
 					WithConsumerQueueDeclare(true),
 					WithConsumerExchangeName("topic"),
+					WithConsumerExchangeKind("topic"),
+					WithConsumerExchangeDeclare(true),
+					WithConsumerExchangeDurable(true),
 					WithConsumerBindKey(key),
 					WithConsumerBind(true),
 				)
@@ -91,6 +97,9 @@ func TestConsumerTopic(t *testing.T) {
 					WithConsumerQueueAutoDelete(true),
 					WithConsumerQueueDeclare(true),
 					WithConsumerExchangeName("topic"),
+					WithConsumerExchangeKind("topic"),
+					WithConsumerExchangeDeclare(true),
+					WithConsumerExchangeDurable(true),
 					WithConsumerBindKey(key),
 					WithConsumerBind(true),
 				)

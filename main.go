@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/whyy1/go-rabbitmq/internal"
 	"os"
-	"runtime"
 	"time"
 )
 
@@ -70,6 +69,5 @@ func main() {
 
 	//todo 检测Close函数后对象是否回收
 	//运行垃圾回收
-	runtime.GC()
 	fmt.Println("运行结束")
 }
