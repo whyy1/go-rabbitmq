@@ -14,7 +14,7 @@ type Publisher struct {
 	options           PublisherOptions
 }
 
-func NewPubilsh(connectionManager *internal.ConnectionManager, optionFuncs ...func(*PublisherOptions)) (publisher *Publisher, err error) {
+func NewPublisher(connectionManager *internal.ConnectionManager, optionFuncs ...func(*PublisherOptions)) (publisher *Publisher, err error) {
 	if connectionManager == nil {
 		return nil, errors.New("connectionManager is nil")
 	}

@@ -22,12 +22,12 @@ func main() {
 		return
 	}
 
-	pubilsh, err := NewPubilsh(coon)
+	pubilsh, err := NewPublisher(coon)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	pubilsh2, err := NewPubilsh(coon)
+	pubilsh2, err := NewPublisher(coon)
 	if err != nil {
 		fmt.Println(err)
 		return

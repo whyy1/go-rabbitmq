@@ -150,7 +150,22 @@ func WithConsumerQueueDeclare(declare bool) func(options *ConsumerOptions) {
 		options.QueueOptions.Declare = declare
 	}
 }
-func WithConsumerQueueBind(bind bool) func(options *ConsumerOptions) {
+func WithConsumerBindKey(key string) func(options *ConsumerOptions) {
+	return func(options *ConsumerOptions) {
+		options.QueueBindOptions.Key = key
+	}
+}
+func WithConsumerBindNoWait(noWait bool) func(options *ConsumerOptions) {
+	return func(options *ConsumerOptions) {
+		options.QueueBindOptions.NoWait = noWait
+	}
+}
+func WithConsumerBindArgs(args amqp.Table) func(options *ConsumerOptions) {
+	return func(options *ConsumerOptions) {
+		options.QueueBindOptions.Args = args
+	}
+}
+func WithConsumerBind(bind bool) func(options *ConsumerOptions) {
 	return func(options *ConsumerOptions) {
 		options.QueueBindOptions.Bind = bind
 	}

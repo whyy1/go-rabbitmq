@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"fmt"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/whyy1/go-rabbitmq/internal"
 )
@@ -51,13 +50,11 @@ func (consumer *Consumer) GetConsumeChannel(
 		return nil, err
 	}
 
-	fmt.Println("队列名称为", consumer.options.QueueOptions.Name)
 	if err := declareQuene(consumer.chanManager, &consumer.options.QueueOptions); err != nil {
 		return nil, err
 	}
 	consumer.options.QueueBindOptions.Exchange = consumer.options.ExchangeOptions.Name
 	consumer.options.QueueBindOptions.Name = consumer.options.QueueOptions.Name
-	fmt.Println("队列名称为", consumer.options.QueueOptions.Name)
 
 	if err := queneBind(consumer.chanManager, consumer.options.QueueBindOptions); err != nil {
 		return nil, err

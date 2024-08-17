@@ -21,7 +21,7 @@ func TestPubilshPubilsh(t *testing.T) {
 		return
 	}
 
-	pubilsh, err := NewPubilsh(coon,
+	publisher, err := NewPublisher(coon,
 		WithPublisherOptionsExchangeName("amq.fanout"),
 	)
 	if err != nil {
@@ -32,7 +32,7 @@ func TestPubilshPubilsh(t *testing.T) {
 	fmt.Println("新建channel成功")
 	//time.Sleep(10 * time.Second)
 
-	if err := pubilsh.PublishWithContext(context.Background(), []byte("test"), []string{"quene1", "quene2", "quene3"},
+	if err := publisher.PublishWithContext(context.Background(), []byte("test"), []string{"quene1", "quene2", "quene3"},
 		WithPublishOptionsExchange("amq.fanout"),
 	); err != nil {
 		fmt.Println("pubilsh1 发送失败", err)
@@ -50,7 +50,7 @@ func TestPubilshPubilsh(t *testing.T) {
 	for {
 		select {
 		case <-ticker.C:
-			if err := pubilsh.PublishWithContext(context.Background(), []byte("test"), []string{"quene1", "quene2", "quene3"},
+			if err := publisher.PublishWithContext(context.Background(), []byte("test"), []string{"quene1", "quene2", "quene3"},
 				WithPublishOptionsExchange("amq.fanout"),
 			); err != nil {
 				fmt.Println("pubilsh1 发送失败", err)

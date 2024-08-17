@@ -10,19 +10,23 @@ import (
 	"testing"
 )
 
-func TestConsumerPublish(t *testing.T) {
+func TestConsumerRouting(t *testing.T) {
 	coon, err := internal.NewCoon(os.Getenv("rabbitmqsource"))
 	if err != nil {
 		log.Println(err)
 		return
 	}
+
 	go func() {
 		for {
 			func() {
 				consumer, err := NewConsumer(coon,
-					WithConsumerQueueDeclare(true),
 					WithConsumerQueueAutoDelete(true),
-					WithConsumerExchangeName("amq.fanout"),
+					WithConsumerQueueDeclare(true),
+					WithConsumerExchangeName("publisher"),
+					WithConsumerExchangeDurable(true),
+					WithConsumerExchangeDeclare(true),
+					WithConsumerBindKey("quene1"),
 					WithConsumerBind(true),
 				)
 				defer consumer.Close()
@@ -32,6 +36,7 @@ func TestConsumerPublish(t *testing.T) {
 				}
 
 				channel, err := consumer.GetConsumeChannel(context.Background(),
+
 					WithConsumeAutoAck(true),
 				)
 				if err != nil {
@@ -49,9 +54,12 @@ func TestConsumerPublish(t *testing.T) {
 		for {
 			func() {
 				consumer, err := NewConsumer(coon,
-					WithConsumerQueueDeclare(true),
 					WithConsumerQueueAutoDelete(true),
-					WithConsumerExchangeName("amq.fanout"),
+					WithConsumerQueueDeclare(true),
+					WithConsumerExchangeName("publisher"),
+					WithConsumerExchangeDurable(true),
+					WithConsumerExchangeDeclare(true),
+					WithConsumerBindKey("quene2"),
 					WithConsumerBind(true),
 				)
 				defer consumer.Close()
@@ -70,6 +78,41 @@ func TestConsumerPublish(t *testing.T) {
 
 				for delivery := range channel {
 					log.Println("Consumer2接收到消息", string(delivery.Body))
+				}
+
+				log.Println("channel结束")
+			}()
+		}
+	}()
+
+	go func() {
+		for {
+			func() {
+				consumer, err := NewConsumer(coon,
+					WithConsumerQueueAutoDelete(true),
+					WithConsumerQueueDeclare(true),
+					WithConsumerExchangeName("publisher"),
+					WithConsumerExchangeDurable(true),
+					WithConsumerExchangeDeclare(true),
+					WithConsumerBindKey("quene3"),
+					WithConsumerBind(true),
+				)
+				defer consumer.Close()
+				if err != nil {
+					log.Println("新建NewConsumer错误", err)
+					return
+				}
+
+				channel, err := consumer.GetConsumeChannel(context.Background(),
+					WithConsumeAutoAck(true),
+				)
+				if err != nil {
+					log.Println("新建GetConsumeChannel错误", err)
+					return
+				}
+
+				for delivery := range channel {
+					log.Println("Consumer3接收到消息", string(delivery.Body))
 				}
 
 				log.Println("channel结束")
