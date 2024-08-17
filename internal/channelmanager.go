@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"errors"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"sync"
 	"time"
@@ -24,9 +23,9 @@ func NewChannelManager(connectionManager *ConnectionManager) (channelManager *Ch
 		options:           connectionManager.options,
 	}
 
-	newChannel := channelManager.getChannel()
-	if newChannel == nil {
-		return nil, errors.New("getChannel is null")
+	newChannel, err := channelManager.connectionManager.newChannel()
+	if err != nil {
+		return nil, err
 	}
 	channelManager.ch = newChannel
 	go channelManager.startNotifyClose()
@@ -53,6 +52,7 @@ func (channelManager *ChannelManager) startNotifyClose() {
 // 不断循环尝试重新连接Channel
 func (channelManager *ChannelManager) reconnectCoonLoop() {
 	for {
+
 		channelManager.chLocker.Lock()
 		select {
 		case <-channelManager.stopSignal:
@@ -82,9 +82,9 @@ func (channelManager *ChannelManager) reconnect() (err error) {
 	channelManager.options.Logger.Infof("%v后开始重新连接Channel", channelManager.options.ReconnectInterval)
 	time.Sleep(channelManager.options.ReconnectInterval)
 	channelManager.options.Logger.Infof("开始重新连接Channel")
-	newChannel := channelManager.getChannel()
-	if newChannel == nil {
-		return errors.New("获取Channel为空")
+	newChannel, err := channelManager.connectionManager.newChannel()
+	if err != nil {
+		return err
 	}
 	channelManager.options.Logger.Infof("重新连接Channel成功")
 	//关闭原有连接再重新赋值，避免并发问题或资源未释放
@@ -94,24 +94,25 @@ func (channelManager *ChannelManager) reconnect() (err error) {
 	channelManager.ch = newChannel
 	return
 }
-func (channelManager *ChannelManager) getChannel() *amqp.Channel {
-	channel := channelManager.connectionManager.channelPool.Get()
-	if channel == nil {
-		return nil
-	}
 
-	return channel.(*amqp.Channel)
-}
+//func (channelManager *ChannelManager) getChannel() *amqp.Channel {
+//	channel := channelManager.connectionManager.channelPool.Get()
+//	if channel == nil {
+//		return nil
+//	}
+//
+//	return channel.(*amqp.Channel)
+//}
 
-func (channelManager *ChannelManager) putChannel() {
-	channelManager.chLocker.Lock()
-	defer channelManager.chLocker.Unlock()
-	//归还Channel
-	channelManager.connectionManager.channelPool.Put(channelManager.ch)
-	//todo 是否需要将对象置空避免没有回收导致内存泄露
-	//channelManager.ch = nil
-	//channelManager.connectionManager = nil
-}
+//func (channelManager *ChannelManager) putChannel() {
+//	channelManager.chLocker.Lock()
+//	defer channelManager.chLocker.Unlock()
+//	//归还Channel
+//	channelManager.connectionManager.channelPool.Put(channelManager.ch)
+//	//todo 是否需要将对象置空避免没有回收导致内存泄露
+//	//channelManager.ch = nil
+//	//channelManager.connectionManager = nil
+//}
 
 func (channelManager *ChannelManager) CloseChannel() {
 	channelManager.chLocker.Lock()

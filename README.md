@@ -17,6 +17,8 @@
    - 提供了一个简单的示例，展示如何使用复用的通道来发布消息。支持直连和路由两种方式。
    - 已实现Publish的多个发送并能够成功重连发送
    - 提供Simple模式Demo
+   - 提供Work模式Demo
+   - 提供Publish模式Demo
 
 5. **Quene的重试创建持久化**
    - 提供了一个简单的示例，展示如何使用复用的通道来发布消息。支持直连和路由两种方式。
@@ -25,6 +27,7 @@
    - 提供了一个对Consume的封装，能够实现Connection的复用，Consumer独占Channel通道来消费消息。
    - 已经实现重连机制以及自动声明交换机和队列
    - 提供Simple模式Demo
+   - 提供Publish模式Demo
    
 
 ## TODO
@@ -46,7 +49,7 @@
    - [x] Publish模式dome
    - Routing模式dome
    - Topic模式dome
-   - 并发情况下多消费者重连机制有误
+   - [x] 并发情况下多消费者重连机制有误
    
 4. **Channel是否需要来维护sync.Pool**
    - ~~如果继续按这个方法实现，要将channel重连状态单独为，在ConnectionManager上层统一维护所有channel状态~~

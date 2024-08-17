@@ -7,12 +7,12 @@ import (
 )
 
 type ConnectionManager struct {
-	source      string
-	conn        *amqp.Connection
-	connLocker  *sync.RWMutex
-	stopSignal  chan struct{} //通知全局Coon停止重连机制
-	options     ConnectionOptions
-	channelPool sync.Pool
+	source     string
+	conn       *amqp.Connection
+	connLocker *sync.RWMutex
+	stopSignal chan struct{} //通知全局Coon停止重连机制
+	options    ConnectionOptions
+	//channelPool sync.Pool
 }
 
 func NewCoon(url string, opts ...func(*ConnectionOptions)) (connectionManager *ConnectionManager, err error) {
@@ -33,8 +33,9 @@ func NewCoon(url string, opts ...func(*ConnectionOptions)) (connectionManager *C
 		return connectionManager, err
 	}
 	connectionManager.conn = coon
-	// 初始化 channelPool 的 New 函数
-	connectionManager.channelPool.New = newChannelPool(connectionManager)
+
+	//// 初始化 channelPool 的 New 函数
+	//connectionManager.channelPool.New = newChannelPool(connectionManager)
 
 	go connectionManager.startNotifyClose()
 
@@ -100,40 +101,44 @@ func (connectionManager *ConnectionManager) reconnect() (err error) {
 	}
 
 	connectionManager.conn = newCoon
-	connectionManager.clearChannelPool() //清空Channel协程池
+	//connectionManager.clearChannelPool() //清空Channel协程池
 	return
 }
-func (connectionManager *ConnectionManager) clearChannelPool() {
-	connectionManager.channelPool = sync.Pool{
-		New: func() interface{} {
-			connectionManager.connLocker.Lock()
-			defer connectionManager.connLocker.Unlock()
-			channel, err := connectionManager.conn.Channel()
-			if err != nil {
-				connectionManager.options.Logger.Errorf("coon新建channel失败,错误为%v", err)
-				return nil
-			}
-			return channel
-		},
-	}
-}
 
-// Pool方式
-func newChannelPool(connectionManager *ConnectionManager) func() interface{} {
-	return func() interface{} {
-		channel, err := connectionManager.conn.Channel()
-		if err != nil {
-			connectionManager.options.Logger.Errorf("failed to create new ch: %v", err)
-			return nil
-		}
-		return channel
-	}
-}
-
-//// 正常创建方法
-//func (connectionManager *ConnectionManager) newChannel() (*amqp.Channel, error) {
-//	return connectionManager.conn.Channel()
+//func (connectionManager *ConnectionManager) clearChannelPool() {
+//	connectionManager.channelPool = sync.Pool{
+//		New: func() interface{} {
+//			connectionManager.connLocker.Lock()
+//			defer connectionManager.connLocker.Unlock()
+//			channel, err := connectionManager.conn.Channel()
+//			if err != nil {
+//				connectionManager.options.Logger.Errorf("coon新建channel失败,错误为%v", err)
+//				return nil
+//			}
+//			return channel
+//		},
+//	}
 //}
+
+//// Pool方式
+//func newChannelPool(connectionManager *ConnectionManager) func() interface{} {
+//	return func() interface{} {
+//		channel, err := connectionManager.conn.Channel()
+//		if err != nil {
+//			connectionManager.options.Logger.Errorf("failed to create new ch: %v", err)
+//			return nil
+//		}
+//		return channel
+//	}
+//}
+
+// 正常创建方法
+func (connectionManager *ConnectionManager) newChannel() (*amqp.Channel, error) {
+	connectionManager.connLocker.Lock()
+	defer connectionManager.connLocker.Unlock()
+
+	return connectionManager.conn.Channel()
+}
 
 func (connectionManager *ConnectionManager) CoonClose() {
 	//加锁保证即使正常关闭的时候，也要等上一次重连结束之后再关闭
